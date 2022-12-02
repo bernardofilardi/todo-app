@@ -22,7 +22,7 @@ namespace ToDo.Domain.Entities
 
         public Guid Id { get; private set; }
         public string Description { get; private set; }
-        public bool Done { get; private set; }
+        public bool Done { get; set; }
         public DateTime CreatedAt { get; private set; }
 
         //public string CreatedAtToString{ 

@@ -1,5 +1,4 @@
-﻿@model IEnumerable<ToDo.Domain.Entities.Item>
-
+﻿@model IEnumerable<ToDo.Application.Dtos.Item.ItemResponseDto>
 @{
     ViewData["Title"] = "Index";
 }
@@ -10,21 +9,28 @@
 
 <table id="item" class="table">
     <thead>
-        <tr class="">
-            <th>Descrição</th>
-            <th>Data de criação</th>
-            <th>Status</th>
-        </tr>
+    <tr class="">
+        <th>Descrição</th>
+        <th>Data de criação</th>
+        <th>Status</th>
+        <th>Ações</th>
+    </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Description</td>
-                <td>@item.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                <td><input type="checkbox" disabled @( item.Done ? "checked" : "" ) action="" /></td>
-            </tr>
-        }
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.Description</td>
+            <td>@item.CreatedAt</td>
+            <td>
+                @Html.CheckBoxFor(m => item.Done, new { @value = "True" })
+            </td>
+            <td>
+                <a href="@Url.Action("Edit", "Item", new { id = item.Id })">Editar</a>
+                <a href="@Url.Action("Remove", "Item", new { id = item.Id })">Apagar</a>
+            </td>
+        </tr>
+    }
     </tbody>
 </table>
 

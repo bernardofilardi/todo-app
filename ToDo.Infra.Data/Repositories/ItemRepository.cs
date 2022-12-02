@@ -9,17 +9,17 @@ namespace ToDo.Infra.Data.Repositories
 {
     public class ItemRepository : IItemRepository
     {
-        private readonly string connectionString;
+        private readonly string _connectionString;
         public ItemRepository(IConfiguration configuration)
         {
-            connectionString = configuration.GetConnectionString("ToDoDb");
+            _connectionString = configuration.GetConnectionString("ToDoDb");
         }
 
         public async Task<IEnumerable<Item>> GetAllAsync()
         {
             IEnumerable<Item> result;
             var query = "select * from Items";
-            using (var con = new SqlConnection(connectionString))
+            using (var con = new SqlConnection(_connectionString))
             {   
                 try
                 {
@@ -42,7 +42,7 @@ namespace ToDo.Infra.Data.Repositories
         public async Task AddAsync(Item item)
         {
             var query = "insert into Items(Id, Description, Done, CreatedAt) values(@Id, @Description, @Done, @CreatedAt)";
-            using (var con = new SqlConnection(connectionString))
+            using (var con = new SqlConnection(_connectionString))
             {    
                 try
                 {
@@ -62,14 +62,19 @@ namespace ToDo.Infra.Data.Repositories
 
         public async Task EditAsync(Item item)
         {
-            var count = 0;
-            var query = "update Items set Description = @Description, Done = @Done where id = @Id";
-            using (var con = new SqlConnection(connectionString))
+
+            var query = "update Items set Done = @Done where id = @Id";
+            var parameters = new
+            {
+                Done = item.Done,
+                Id = item.Id
+            };
+            using (var con = new SqlConnection(_connectionString))
             {
                 try
                 {
                     con.Open();
-                    count = await con.ExecuteAsync(query, item);
+                    await con.ExecuteAsync(query, parameters);
                 }
                 catch (Exception)
                 {
@@ -80,6 +85,54 @@ namespace ToDo.Infra.Data.Repositories
                     con.Close();
                 }
             };
+        }
+
+        public Item GetOne(Guid id)
+        {
+            Item item;
+            var query = "select * from Items where id = @Id";
+            var parameters = new { Id = id };
+            using (var con = new SqlConnection(_connectionString))
+            {
+                try
+                {
+                    con.Open();
+                    item = con.QuerySingle<Item>(query, parameters);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+                finally
+                {
+                    con.Close();
+                }
+            };
+            return item;
+
+        }
+
+        public async Task RemoveAsync(Guid id)
+        {
+            var query = "delete from Items where id = @Id";
+            var parameters = new { Id = id };
+            using (var con = new SqlConnection(_connectionString))
+            {
+                try
+                {
+                    con.Open();
+                    await con.ExecuteAsync(query, parameters);
+                }
+                catch (Exception)
+                {
+                    throw;
+                }
+                finally
+                {
+                    con.Close();
+                }
+            };
+
         }
     }
 }
